@@ -1,6 +1,6 @@
-# E8069 Computational Methods (HWS 2026)
+# E8069 Computational Macro (HWS 2026)
 
-Material for the PhD course Computational Methods at the University of Mannheim. The [syllabus](Syllabus.pdf) contains the course plan, assessment rules, literature, and trivia topics.
+Material for the PhD course Computational Macro at the University of Mannheim. The [syllabus](Syllabus.pdf) contains the course plan, assessment rules, literature, and trivia topics.
 
 All coding content of the course (code templates, problem sets, coding snippets) is distributed through this repository. Your own solutions go into a separate repository that we set up together in class.
 
