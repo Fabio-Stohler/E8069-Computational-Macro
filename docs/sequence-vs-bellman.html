@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interactive companion to Session 1 of Computational Macro (University of Mannheim): the growth model solved as a sequence problem and by dynamic programming.">
+<style>
+  html{color-scheme:light dark}
+  body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Sequence vs. Bellman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+
+<style>
+:root{
+  --paper:#EEF1F6; --surface:#FFFFFF; --surface-2:#F7F9FC;
+  --ink:#111E36; --ink-2:#41536E; --ink-3:#74849B;
+  --rule:#CCD6E4; --rule-2:#E3E9F1;
+  --struct:#1F4E9C; --fail:#AF3520; --hold:#0B7A62; --accent:#A9790A;
+  --accent-soft:rgba(169,121,10,.13);
+  --grid:rgba(17,30,54,.075);
+  --shadow:0 1px 2px rgba(17,30,54,.06),0 8px 24px -14px rgba(17,30,54,.30);
+  --f-disp:"Spectral",Georgia,"Times New Roman",serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0C1421; --surface:#141E2C; --surface-2:#101A27;
+    --ink:#E4EAF3; --ink-2:#A6B5CA; --ink-3:#71809A;
+    --rule:#293646; --rule-2:#1D2837;
+    --struct:#6FA1EA; --fail:#E4735A; --hold:#2FB394; --accent:#DFAB33;
+    --accent-soft:rgba(223,171,51,.15);
+    --grid:rgba(228,234,243,.075);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1421; --surface:#141E2C; --surface-2:#101A27;
+  --ink:#E4EAF3; --ink-2:#A6B5CA; --ink-3:#71809A;
+  --rule:#293646; --rule-2:#1D2837;
+  --struct:#6FA1EA; --fail:#E4735A; --hold:#2FB394; --accent:#DFAB33;
+  --accent-soft:rgba(223,171,51,.15);
+  --grid:rgba(228,234,243,.075);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:26px 60px}
+
+/* ---------- header ---------- */
+.masthead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 18px;
+  padding-bottom:14px;border-bottom:1.5px solid var(--ink)}
+.masthead h1{font-family:var(--f-disp);font-weight:600;font-size:clamp(26px,4.4vw,38px);
+  margin:0;letter-spacing:-.015em;text-wrap:balance}
+.masthead .kicker{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-3);margin-left:auto}
+.standfirst{margin:14px 0 0;max-width:66ch;color:var(--ink-2);font-size:15.5px}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:2px;margin:22px 0 0;border-bottom:1px solid var(--rule)}
+.tab{appearance:none;background:none;border:0;border-bottom:2.5px solid transparent;
+  font-family:var(--f-body);font-size:14px;font-weight:500;color:var(--ink-3);
+  padding:9px 15px;cursor:pointer;margin-bottom:-1px;transition:color .15s}
+.tab .n{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);margin-right:7px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab[aria-selected="true"] .n{color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+
+/* ---------- structure ---------- */
+.lab{padding-top:26px}
+.lab[hidden]{display:none!important}
+.lede{max-width:64ch;color:var(--ink-2);margin:0 0 20px}
+.lede strong{color:var(--ink);font-weight:600}
+h2.step{font-family:var(--f-disp);font-weight:600;font-size:20px;margin:34px 0 4px;
+  letter-spacing:-.01em;display:flex;align-items:baseline;gap:10px}
+h2.step .ord{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--accent);
+  border:1px solid var(--accent);border-radius:2px;padding:1px 5px;flex:none}
+.sub{color:var(--ink-2);margin:0 0 16px;max-width:64ch;font-size:14.5px}
+
+/* math */
+.m{font-family:var(--f-disp);font-style:italic;font-size:1.06em;white-space:nowrap}
+.m .op{font-style:normal}
+.eq{font-family:var(--f-disp);font-style:italic;font-size:18px;text-align:center;
+  padding:14px 12px;margin:0 0 18px;background:var(--surface-2);
+  border-left:2px solid var(--struct);overflow-x:auto}
+.eq .op{font-style:normal}
+.eq .note{font-style:normal;font-family:var(--f-body);font-size:12.5px;color:var(--ink-3);
+  display:block;margin-top:6px}
+
+/* ---------- controls ---------- */
+.rail{display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:16px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.ctl{display:flex;flex-direction:column;gap:5px;min-width:172px;flex:1 1 172px}
+.ctl label{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.05em;
+  color:var(--ink-3);display:flex;justify-content:space-between;gap:10px}
+.ctl label .val{font-size:12.5px;letter-spacing:0;color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:20px;
+  background:none;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--rule);border-radius:2px}
+input[type=range]::-moz-range-track{height:3px;background:var(--rule);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;
+  border-radius:50%;background:var(--accent);margin-top:-6px;border:2px solid var(--surface)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--surface)}
+input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.btns{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+button.b{appearance:none;font-family:var(--f-body);font-size:13px;font-weight:500;
+  background:var(--surface-2);color:var(--ink-2);border:1px solid var(--rule);
+  border-radius:2px;padding:6px 11px;cursor:pointer;transition:.15s}
+button.b:hover{border-color:var(--accent);color:var(--ink)}
+button.b:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.b.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.hintline{font-size:12.5px;color:var(--ink-3);flex-basis:100%;margin:0}
+
+/* ---------- verdict ---------- */
+.verdict{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;margin-bottom:18px;
+  background:var(--surface);border:1px solid var(--rule);border-left-width:4px;border-radius:3px}
+.verdict .tagv{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;padding-top:3px;flex:none;white-space:nowrap}
+.verdict .txt{font-size:14.5px;color:var(--ink-2)}
+.verdict .txt b{color:var(--ink);font-weight:600}
+.verdict.fail{border-left-color:var(--fail)} .verdict.fail .tagv{color:var(--fail)}
+.verdict.hold{border-left-color:var(--hold)} .verdict.hold .tagv{color:var(--hold)}
+.verdict.info{border-left-color:var(--struct)} .verdict.info .tagv{color:var(--struct)}
+
+/* ---------- plots ---------- */
+.plots{display:grid;gap:14px;grid-template-columns:1.32fr 1fr;align-items:stretch}
+.plots.one{grid-template-columns:1fr}
+.plots.two{grid-template-columns:1fr 1fr}
+.stack{display:grid;gap:14px;grid-template-rows:1fr 1fr}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:12px 12px 8px;display:flex;flex-direction:column;min-width:0;box-shadow:var(--shadow)}
+.panel h3{margin:0;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.panel h3 .sym,table.ro th .sym{text-transform:none;letter-spacing:0}
+.panel .cap{margin:3px 0 8px;font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.cv{width:100%;flex:1 1 auto;display:block}
+.big .cv{min-height:360px} .sm .cv{min-height:172px} .md .cv{min-height:260px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:7px 0 3px;
+  font-family:var(--f-mono);font-size:11px;color:var(--ink-2)}
+.legend i{display:inline-block;width:14px;height:2.5px;vertical-align:middle;
+  margin-right:5px;border-radius:1px}
+
+/* ---------- ask block ---------- */
+.ask{margin:20px 0 0;padding:13px 16px;border:1px dashed var(--accent);
+  background:var(--accent-soft);border-radius:3px}
+.ask .lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent);display:block;margin-bottom:5px}
+.ask p{margin:0 0 6px;font-size:14.5px;color:var(--ink)}
+.ask p:last-child{margin-bottom:0}
+.ask ol{margin:6px 0 0;padding-left:20px;font-size:14px;color:var(--ink-2)}
+.ask li{margin-bottom:3px}
+
+/* ---------- readout table ---------- */
+.tblwrap{overflow-x:auto;margin-top:12px}
+table.ro{border-collapse:collapse;width:100%;font-size:13.5px;min-width:400px}
+table.ro th,table.ro td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--rule-2);
+  font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.ro th{font-size:11px;letter-spacing:.04em;
+  color:var(--ink-3);font-weight:500;border-bottom-color:var(--rule)}
+table.ro td:first-child,table.ro th:first-child{text-align:left}
+table.ro tr:last-child td{border-bottom:0}
+
+.foot{margin-top:46px;padding-top:16px;border-top:1px solid var(--rule);
+  font-size:13px;color:var(--ink-3);max-width:70ch}
+.foot code{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-2)}
+
+@media (max-width:860px){
+  .plots,.plots.two{grid-template-columns:1fr}
+  .stack{grid-template-rows:auto auto}
+  .big .cv{min-height:300px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <h1>Sequence vs. Bellman</h1>
+  <span class="kicker">Computational Macro &middot; Session 1</span>
+</header>
+<p class="standfirst">The same growth model, log utility with production <span class="m">k<sup class="op">α</sup></span> and
+full depreciation, solved twice. Route one hunts for the single saving rate that survives transversality.
+Route two iterates an operator until it stops moving. Both land on
+<span class="m">k<span class="op">′</span> = αβ k<sup class="op">α</sup></span>. Nothing here needs installing. Move a slider and the charts, the numbers and the verdict line all update as you go.</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t-a" aria-controls="lab-a" aria-selected="true"><span class="n">01</span>Sequence problem</button>
+  <button class="tab" role="tab" id="t-b" aria-controls="lab-b" aria-selected="false"><span class="n">02</span>Dynamic programming</button>
+</div>
+
+<!-- ============================ LAB A ============================ -->
+<section class="lab" id="lab-a" role="tabpanel" aria-labelledby="t-a">
+
+  <p class="lede">The Euler equation collapses to a first&#8209;order difference equation in the saving rate
+  <span class="m">s<sub class="op">t</sub> = k<sub class="op">t+1</sub> / k<sub class="op">t</sub><sup class="op">α</sup></span>.
+  Capital drops out, and with it the initial condition. <strong>Every</strong> starting value
+  <span class="m">s<sub class="op">0</sub> &isin; (0,1)</span> satisfies the Euler equation. Only one of them is optimal.</p>
+
+  <p class="eq">s<span class="op">&#8202;</span><sub class="op">t+1</sub> <span class="op">=</span> φ(s<sub class="op">t</sub>) <span class="op">=</span> 1 <span class="op">&minus;</span> αβ <span class="op">·</span> (1 <span class="op">&minus;</span> s<sub class="op">t</sub>) <span class="op">/</span> s<sub class="op">t</sub>
+    <span class="note">Fixed points where φ(s) = s: exactly s = αβ and s = 1. Slope φ′(s) = αβ/s², so φ′(αβ) = 1/αβ &gt; 1 (repelling) and φ′(1) = αβ &lt; 1 (attracting).</span></p>
+
+  <div class="rail">
+    <div class="ctl">
+      <label for="a-alpha">α &nbsp;capital share <span class="val" id="a-alpha-v">0.30</span></label>
+      <input type="range" id="a-alpha" min="0.10" max="0.60" step="0.01" value="0.30">
+    </div>
+    <div class="ctl">
+      <label for="a-beta">β &nbsp;discount factor <span class="val" id="a-beta-v">0.96</span></label>
+      <input type="range" id="a-beta" min="0.80" max="0.99" step="0.005" value="0.96">
+    </div>
+    <div class="ctl">
+      <label for="a-s0">s₀ &nbsp;initial saving rate <span class="val" id="a-s0-v">0.350</span></label>
+      <input type="range" id="a-s0" min="0.02" max="0.98" step="0.002" value="0.350">
+    </div>
+    <div class="ctl">
+      <label for="a-n">n &nbsp;periods drawn <span class="val" id="a-n-v">12</span></label>
+      <input type="range" id="a-n" min="1" max="40" step="1" value="12">
+    </div>
+    <div class="btns">
+      <button class="b" data-preset="above">s₀ &gt; αβ</button>
+      <button class="b" data-preset="exact">s₀ = αβ</button>
+      <button class="b" data-preset="below">s₀ &lt; αβ</button>
+      <button class="b" id="a-step">Step +1</button>
+    </div>
+    <p class="hintline">Snap s₀ onto the knife edge, then nudge it by one tick. The Euler equation cannot tell the two apart, transversality can.</p>
+  </div>
+
+  <div class="verdict info" id="a-verdict">
+    <span class="tagv" id="a-vtag">&mdash;</span>
+    <span class="txt" id="a-vtxt">&mdash;</span>
+  </div>
+
+  <div class="plots">
+    <div class="panel big">
+      <h3>Phase diagram</h3>
+      <p class="cap">The cobweb from s₀. Grey dashed is the 45° line, blue is φ(s). Two crossings, two candidate steady states.</p>
+      <canvas class="cv" id="cv-phase"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--struct)"></i>φ(s)</span>
+        <span><i style="background:var(--ink-3)"></i>45°</span>
+        <span><i id="lg-cob" style="background:var(--fail)"></i>path from s₀</span>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel sm">
+        <h3>Saving rate over time</h3>
+        <p class="cap">Shaded band is infeasible. s &le; 0 means negative capital, s &ge; 1 means zero consumption.</p>
+        <canvas class="cv" id="cv-spath"></canvas>
+      </div>
+      <div class="panel sm">
+        <h3>Transversality term</h3>
+        <p class="cap"><span class="m">β<sup class="op">t</sup> λ<sub class="op">t</sub> k<sub class="op">t+1</sub> = β<sup class="op">t</sup> s<sub class="op">t</sub>/(1−s<sub class="op">t</sub>)</span> on a log scale. It must go to zero. Dashed green is the exact knife-edge path β<sup>t</sup>·αβ/(1−αβ).</p>
+        <canvas class="cv" id="cv-tvc"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="ask">
+    <span class="lbl">Before you move the slider</span>
+    <p>Every one of these paths satisfies the Euler equation at every date. Commit to an answer first, then go and check it.</p>
+    <ol>
+      <li>Something close to 1, because capital is productive</li>
+      <li>Exactly αβ</li>
+      <li>Something small, because consumption today is discounted least</li>
+      <li>All of them. The Euler equation is the optimality condition, so we need more information to choose</li>
+    </ol>
+    <p style="margin-top:8px">Now drag s₀ from one side of αβ to the other and read the verdict line. Two different things go wrong, and only one of them is about transversality.</p>
+  </div>
+
+  <div class="verdict info" style="margin-top:18px">
+    <span class="tagv">Numerics</span>
+    <span class="txt" id="a-drift">&mdash;</span>
+  </div>
+
+</section>
+
+<!-- ============================ LAB B ============================ -->
+<section class="lab" id="lab-b" role="tabpanel" aria-labelledby="t-b" hidden>
+
+  <p class="lede">Same model, unknowns are now <strong>two functions of the state</strong> rather than an infinite sequence.
+  Guess <span class="m">v(k) = E + F <span class="op">ln</span> k</span> and the whole problem reduces to one number,
+  <span class="m">F</span>. Iterating the Bellman operator becomes iterating a scalar, which is small enough
+  to watch converge.</p>
+
+  <h2 class="step"><span class="ord">B1</span>Iterate the coefficient, from any starting guess</h2>
+  <p class="sub">With <span class="m">v<sub class="op">n</sub>(k) = F<sub class="op">n</sub> <span class="op">ln</span> k + D<sub class="op">n</sub></span>,
+  one Bellman update gives
+  <span class="m">k<span class="op">′</span> = βF<sub class="op">n</sub>/(1+βF<sub class="op">n</sub>) <span class="op">·</span> k<sup class="op">α</sup></span>
+  and <span class="m">F<sub class="op">n+1</sub> = α + αβ F<sub class="op">n</sub></span>. The contraction theorem says the starting
+  guess cannot matter. Test it.</p>
+
+  <div class="rail">
+    <div class="ctl">
+      <label for="b-alpha">α &nbsp;capital share <span class="val" id="b-alpha-v">0.30</span></label>
+      <input type="range" id="b-alpha" min="0.10" max="0.60" step="0.01" value="0.30">
+    </div>
+    <div class="ctl">
+      <label for="b-beta">β &nbsp;discount factor <span class="val" id="b-beta-v">0.96</span></label>
+      <input type="range" id="b-beta" min="0.80" max="0.99" step="0.005" value="0.96">
+    </div>
+    <div class="ctl">
+      <label for="b-f0">F₀ &nbsp;starting guess <span class="val" id="b-f0-v">0.00</span></label>
+      <input type="range" id="b-f0" min="-8" max="40" step="0.5" value="0">
+    </div>
+    <div class="ctl">
+      <label for="b-n">n &nbsp;iterations <span class="val" id="b-n-v">25</span></label>
+      <input type="range" id="b-n" min="2" max="60" step="1" value="25">
+    </div>
+    <div class="btns">
+      <button class="b" id="b-pin">Pin this start</button>
+      <button class="b" id="b-clear">Clear pins</button>
+    </div>
+    <p class="hintline">Pick any starting value, the more absurd the better. Pin it, then pin another. Read off F<sub>n</sub> after 25 iterations each time and compare the digits.</p>
+  </div>
+
+  <div class="verdict hold" id="b-verdict">
+    <span class="tagv" id="b-vtag">Fixed point</span>
+    <span class="txt" id="b-vtxt">&mdash;</span>
+  </div>
+
+  <div class="plots two">
+    <div class="panel md">
+      <h3>F<sub>n</sub> along the iteration</h3>
+      <p class="cap">Dashed line is F* = α/(1−αβ). Pinned starts stay on the chart.</p>
+      <canvas class="cv" id="cv-fn"></canvas>
+    </div>
+    <div class="panel md">
+      <h3><span class="sym">|F<sub>n</sub> − F*|</span> on a log scale</h3>
+      <p class="cap">A straight line means geometric convergence. Its slope is the rate.</p>
+      <canvas class="cv" id="cv-ferr"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--fail)"></i>observed, ratio <span id="b-rate" style="font-variant-numeric:tabular-nums">0.288</span></span>
+        <span><i style="background:var(--ink-3)"></i>theorem's bound, rate β</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ask">
+    <span class="lbl">Worth stopping on</span>
+    <p>The contraction theorem promises <span class="m">‖v<sub class="op">n</sub> &minus; v*‖ &le; β<sup class="op">n</sup>‖v<sub class="op">0</sub> &minus; v*‖</span>,
+    a rate of β = 0.96. The chart shows the error falling by a factor of <span id="b-rate2" style="font-family:var(--f-mono)">0.288</span> = αβ each step, far faster.
+    Is the theorem wrong?</p>
+    <p style="color:var(--ink-2);font-size:13.5px">(No. β is a worst case over the whole function space, and this
+    family of log functions is not the worst case. It also is not in the bounded function space the theorem is stated on.
+    Both threads lead into the week&#8209;3 trivia topic on why the Bellman operator is a contraction.)</p>
+  </div>
+
+  <h2 class="step"><span class="ord">B2</span>The policy function, iteration by iteration</h2>
+  <p class="sub">Each F<sub>n</sub> implies a saving rate σ<sub>n</sub> = βF<sub>n</sub>/(1+βF<sub>n</sub>), and the policy
+  <span class="m">k<span class="op">′</span> = σ<sub class="op">n</sub> k<sup class="op">α</sup></span> climbs onto αβ k<sup>α</sup>.
+  Note where these numbers land. σ<sub>&infin;</sub> = αβ, exactly the knife-edge saving rate the other route had to argue for.</p>
+
+  <div class="plots one">
+    <div class="panel md">
+      <h3>Policy functions k′(k) across iterations</h3>
+      <p class="cap">Thin to thick: n = 1, 2, 3, 5, 10, iterating from v₀ = 0. Green is the analytical policy αβ k<sup>α</sup>. Grey dashed is the 45° line, whose crossing with the policy is the steady state.</p>
+      <canvas class="cv" id="cv-pol"></canvas>
+    </div>
+  </div>
+
+  <h2 class="step"><span class="ord">B3</span>Now put it on a grid, a look ahead to next week</h2>
+  <p class="sub">On a computer there is no <span class="m">F</span>. <span class="m">v<sub class="op">n</sub></span> lives on a grid of
+  <span class="m">N</span> capital points and the max is a search over those same points. Everything above still holds,
+  but a second error appears that iterating cannot remove.</p>
+
+  <div class="rail">
+    <div class="ctl">
+      <label for="g-n">N &nbsp;grid points <span class="val" id="g-n-v">60</span></label>
+      <input type="range" id="g-n" min="10" max="200" step="5" value="60">
+    </div>
+    <div class="ctl" style="flex:2 1 260px;justify-content:flex-end">
+      <p class="hintline" style="margin:0">Converges to tolerance 10⁻⁹ on every change. <span id="g-info" style="font-family:var(--f-mono);font-size:12px"></span></p>
+    </div>
+  </div>
+
+  <div class="plots two">
+    <div class="panel md">
+      <h3>On-grid policy vs. the truth</h3>
+      <p class="cap">Dots are the grid solution. The choice must land on a grid point, so the policy is a staircase.</p>
+      <canvas class="cv" id="cv-grid"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--fail)"></i>on-grid k′</span>
+        <span><i style="background:var(--hold)"></i>αβ k<sup>α</sup></span>
+      </div>
+    </div>
+    <div class="panel md">
+      <h3>Two errors, only one of which goes away</h3>
+      <p class="cap">Log scale, by iteration.</p>
+      <canvas class="cv" id="cv-gerr"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--ink-3)"></i>‖v<sub>n</sub> − v<sub>n−1</sub>‖</span>
+        <span><i style="background:var(--struct)"></i>bound β/(1−β)·‖v<sub>n</sub> − v<sub>n−1</sub>‖</span>
+        <span><i style="background:var(--fail)"></i>true ‖v<sub>n</sub> − v*‖</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tblwrap">
+    <table class="ro" id="g-table">
+      <thead><tr><th>grid N</th><th>iterations</th><th><span class="sym">max |k′ − αβk<sup>α</sup>|</span></th><th>grid spacing</th><th><span class="sym">max |v − v*|</span></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="ask">
+    <span class="lbl">The question to leave with</span>
+    <p>Push the tolerance as low as you like. The iteration error falls to 10⁻⁹ and the red line still flattens out well above zero.
+    Where does the error that remains come from, and would running more iterations ever remove it?</p>
+    <p style="margin-top:8px;color:var(--ink-2);font-size:13.5px">Now move the grid slider and watch that floor move instead. This is the reason
+    every method in this course is first run on a model we can solve by hand.</p>
+  </div>
+
+</section>
+
+<p class="foot">Parameters default to the deck's α = 0.30, β = 0.96, so αβ = 0.288.
+Everything is computed in the page. The grid solver is brute-force value function iteration over
+<code>N×N</code> capital choices, stopping at <code>‖v_n − v_{n−1}‖ &lt; 1e−9</code>.
+The analytical benchmark is <code>v(k) = E + α/(1−αβ)·ln k</code> with
+<code>E = [ln(1−αβ) + βα/(1−αβ)·ln(αβ)]/(1−β)</code>.</p>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- theme-aware plotting ---------------- */
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+function Plot(el){ this.el=el; this.ctx=el.getContext('2d'); }
+Plot.prototype.begin=function(o){
+  var dpr=window.devicePixelRatio||1, r=this.el.getBoundingClientRect();
+  var w=Math.max(220,Math.round(r.width)), h=Math.max(140,Math.round(r.height));
+  this.el.width=Math.round(w*dpr); this.el.height=Math.round(h*dpr);
+  var c=this.ctx; c.setTransform(dpr,0,0,dpr,0,0); c.clearRect(0,0,w,h);
+  this.w=w; this.h=h; this.o=o;
+  this.m={l:o.ml!=null?o.ml:48,r:o.mr!=null?o.mr:14,t:o.mt!=null?o.mt:12,b:o.mb!=null?o.mb:30};
+  this.ylog=!!o.ylog;
+  this.x0=o.xmin; this.x1=o.xmax;
+  this.y0=this.ylog?Math.log10(o.ymin):o.ymin;
+  this.y1=this.ylog?Math.log10(o.ymax):o.ymax;
+  if(this.y1-this.y0<1e-12) this.y1=this.y0+1;
+  this.iw=w-this.m.l-this.m.r; this.ih=h-this.m.t-this.m.b;
+  this.ink=tok('--ink'); this.ink2=tok('--ink-2'); this.ink3=tok('--ink-3');
+  this.grid=tok('--grid'); this.rule=tok('--rule');
+  return this;
+};
+Plot.prototype.px=function(x){return this.m.l+(x-this.x0)/(this.x1-this.x0)*this.iw;};
+Plot.prototype.py=function(y){var v=this.ylog?Math.log10(Math.max(y,1e-300)):y;
+  return this.m.t+this.ih-(v-this.y0)/(this.y1-this.y0)*this.ih;};
+Plot.prototype.clip=function(){var c=this.ctx;c.save();c.beginPath();
+  c.rect(this.m.l,this.m.t,this.iw,this.ih);c.clip();};
+Plot.prototype.unclip=function(){this.ctx.restore();};
+Plot.prototype.frame=function(xt,yt,fx,fy){
+  var c=this.ctx,i;
+  c.font='11px "IBM Plex Mono",monospace';
+  c.lineWidth=1;
+  for(i=0;i<xt.length;i++){var X=Math.round(this.px(xt[i]))+.5;
+    c.strokeStyle=this.grid;c.beginPath();c.moveTo(X,this.m.t);c.lineTo(X,this.m.t+this.ih);c.stroke();
+    c.fillStyle=this.ink3;c.textAlign='center';c.textBaseline='top';
+    c.fillText(fx?fx(xt[i]):String(xt[i]),X,this.m.t+this.ih+7);}
+  for(i=0;i<yt.length;i++){var Y=Math.round(this.py(yt[i]))+.5;
+    if(Y<this.m.t-1||Y>this.m.t+this.ih+1)continue;
+    c.strokeStyle=this.grid;c.beginPath();c.moveTo(this.m.l,Y);c.lineTo(this.m.l+this.iw,Y);c.stroke();
+    c.fillStyle=this.ink3;c.textAlign='right';c.textBaseline='middle';
+    c.fillText(fy?fy(yt[i]):String(yt[i]),this.m.l-8,Y);}
+  c.strokeStyle=this.rule;c.lineWidth=1;
+  c.strokeRect(this.m.l+.5,this.m.t+.5,this.iw-1,this.ih-1);
+};
+Plot.prototype.line=function(pts,color,lw,dash){
+  if(pts.length<2)return; var c=this.ctx;
+  c.save();c.beginPath();c.rect(this.m.l,this.m.t,this.iw,this.ih);c.clip();
+  c.strokeStyle=color;c.lineWidth=lw||1.8;c.lineJoin='round';c.lineCap='round';
+  c.setLineDash(dash||[]);c.beginPath();
+  for(var i=0;i<pts.length;i++){var X=this.px(pts[i][0]),Y=this.py(pts[i][1]);
+    if(!isFinite(X)||!isFinite(Y)){c.stroke();c.beginPath();continue;}
+    if(i===0)c.moveTo(X,Y);else c.lineTo(X,Y);}
+  c.stroke();c.setLineDash([]);c.restore();
+};
+Plot.prototype.dots=function(pts,color,r){
+  var c=this.ctx;c.save();c.beginPath();c.rect(this.m.l,this.m.t,this.iw,this.ih);c.clip();
+  c.fillStyle=color;
+  for(var i=0;i<pts.length;i++){var X=this.px(pts[i][0]),Y=this.py(pts[i][1]);
+    if(!isFinite(X)||!isFinite(Y))continue;
+    c.beginPath();c.arc(X,Y,r||2.4,0,6.2832);c.fill();}
+  c.restore();
+};
+Plot.prototype.band=function(y0,y1,color){
+  var c=this.ctx,a=this.py(y0),b=this.py(y1);
+  c.save();c.beginPath();c.rect(this.m.l,this.m.t,this.iw,this.ih);c.clip();
+  c.fillStyle=color;c.fillRect(this.m.l,Math.min(a,b),this.iw,Math.abs(b-a));c.restore();
+};
+Plot.prototype.label=function(x,y,txt,color,align,dx,dy){
+  var c=this.ctx;c.save();c.font='11px "IBM Plex Mono",monospace';
+  c.fillStyle=color;c.textAlign=align||'left';c.textBaseline='middle';
+  c.fillText(txt,this.px(x)+(dx||0),this.py(y)+(dy||0));c.restore();
+};
+Plot.prototype.axtitle=function(xl,yl){
+  var c=this.ctx;c.save();c.font='11px "IBM Plex Mono",monospace';c.fillStyle=this.ink3;
+  if(xl){c.textAlign='right';c.textBaseline='bottom';c.fillText(xl,this.m.l+this.iw,this.h-2);}
+  if(yl){c.textAlign='left';c.textBaseline='top';c.fillText(yl,2,1);}
+  c.restore();
+};
+
+/* ---------------- tabs ---------------- */
+var tabs=[].slice.call(document.querySelectorAll('.tab'));
+tabs.forEach(function(t){t.addEventListener('click',function(){
+  tabs.forEach(function(o){o.setAttribute('aria-selected',String(o===t));
+    document.getElementById(o.getAttribute('aria-controls')).hidden=(o!==t);});
+  drawAll();});});
+
+/* ============================================================
+   LAB A
+   ============================================================ */
+var A={};
+['a-alpha','a-beta','a-s0','a-n'].forEach(function(id){A[id]=document.getElementById(id);});
+var pPhase=new Plot(document.getElementById('cv-phase')),
+    pSpath=new Plot(document.getElementById('cv-spath')),
+    pTvc  =new Plot(document.getElementById('cv-tvc'));
+
+function sPath(al,be,s0,n){
+  var ab=al*be,s=s0,out=[s],feasT=-1;
+  for(var t=0;t<n;t++){
+    if(s<=0){feasT=t;break;}
+    s=1-ab*(1-s)/s;
+    out.push(s);
+    if(s<=0){feasT=t+1;break;}
+    if(s>=1){s=1;}
+  }
+  return {s:out,feasT:feasT,ab:ab};
+}
+
+function drawA(){
+  var al=+A['a-alpha'].value, be=+A['a-beta'].value, s0=+A['a-s0'].value, n=+A['a-n'].value;
+  var ab=al*be;
+  document.getElementById('a-alpha-v').textContent=al.toFixed(2);
+  document.getElementById('a-beta-v').textContent=be.toFixed(3);
+  document.getElementById('a-s0-v').textContent=s0.toFixed(3);
+  document.getElementById('a-n-v').textContent=n;
+
+  var st=tok('--struct'),fl=tok('--fail'),hd=tok('--hold'),i3=tok('--ink-3'),i2=tok('--ink-2');
+  var r=sPath(al,be,s0,n);
+  var knife=Math.abs(s0-ab)<0.0015;
+  var col= knife?hd : fl;
+  document.getElementById('lg-cob').style.background=col;
+
+  /* ---- phase diagram ---- */
+  var P=pPhase.begin({xmin:0,xmax:1.04,ymin:-0.28,ymax:1.06,ml:46,mb:32});
+  P.band(-0.28,0,'rgba(175,53,32,.08)');
+  P.frame([0,0.2,0.4,0.6,0.8,1.0],[-0.2,0,0.2,0.4,0.6,0.8,1.0],
+    function(v){return v.toFixed(1);},function(v){return v.toFixed(1);});
+  P.line([[0,0],[1.04,1.04]],i3,1.3,[4,4]);
+  var phi=[],x;
+  for(x=0.02;x<=1.045;x+=0.004){var y=1-ab*(1-x)/x; if(y>-0.4) phi.push([x,y]);}
+  P.line(phi,st,2.1);
+  // fixed points
+  P.dots([[ab,ab],[1,1]],st,4.2);
+  P.label(ab,ab,'αβ = '+ab.toFixed(3),i2,'left',9,10);
+  P.label(1,1,'1',i2,'right',-6,12);
+  // cobweb
+  var cob=[],s=r.s[0];
+  cob.push([s,0]);
+  for(var t=0;t+1<r.s.length;t++){
+    cob.push([r.s[t],r.s[t+1]]);
+    cob.push([r.s[t+1],r.s[t+1]]);
+  }
+  P.line(cob,col,1.9);
+  P.dots([[s0,0]],col,3.4);
+  P.label(s0,0,'s₀',col,'center',0,-11);
+  P.axtitle('sₜ','sₜ₊₁');
+
+  /* ---- saving rate path ---- */
+  var lo=Math.min(-0.3,Math.min.apply(null,r.s)-0.05), hi=1.15;
+  lo=Math.max(lo,-1.2);
+  var S=pSpath.begin({xmin:0,xmax:Math.max(n,4),ymin:lo,ymax:hi,ml:44,mb:28,mt:10});
+  S.band(lo,0,'rgba(175,53,32,.09)');
+  S.band(1,hi,'rgba(175,53,32,.09)');
+  var sp=r.s.map(function(v,i){return [i,v];});
+  S.frame(tickInts(0,Math.max(n,4),6),[0,0.5,1],function(v){return String(v);},function(v){return v.toFixed(1);});
+  S.line([[0,ab],[Math.max(n,4),ab]],hd,1.3,[5,4]);
+  S.line(sp,col,1.9); S.dots(sp,col,2.4);
+  S.label(Math.max(n,4),ab,'αβ',hd,'right',-4,-9);
+  S.axtitle('t','sₜ');
+
+  /* ---- transversality ---- */
+  var tv=[],kn=[],T=Math.max(n,4),vmin=1e300,vmax=1e-300,sv;
+  for(var q=0;q<r.s.length;q++){
+    sv=r.s[q]; if(sv<=0||sv>=1) break;
+    var val=Math.pow(be,q)*sv/(1-sv);
+    tv.push([q,val]); if(val<vmin)vmin=val; if(val>vmax)vmax=val;
+  }
+  for(var q2=0;q2<=T;q2++){var kv=Math.pow(be,q2)*ab/(1-ab); kn.push([q2,kv]);
+    if(kv<vmin)vmin=kv; if(kv>vmax)vmax=kv;}
+  if(!isFinite(vmin)||vmin<=0)vmin=1e-6; if(!isFinite(vmax)||vmax<=0)vmax=1;
+  var V=pTvc.begin({xmin:0,xmax:T,ymin:vmin/3,ymax:vmax*3,ml:52,mb:28,mt:10,ylog:true});
+  V.frame(tickInts(0,T,6),logTicks(vmin/3,vmax*3),function(v){return String(v);},logfmt);
+  V.line(kn,hd,1.5,[5,4]);
+  V.line(tv,col,2.0); V.dots(tv,col,2.2);
+  V.axtitle('t',null);
+
+  /* ---- verdict ---- */
+  var vd=document.getElementById('a-verdict'),
+      tg=document.getElementById('a-vtag'), tx=document.getElementById('a-vtxt');
+  var last=r.s[r.s.length-1];
+  vd.className='verdict '+(knife?'hold':'fail');
+  if(knife){
+    tg.textContent='Survives';
+    tx.innerHTML='s₀ = αβ = <b>'+ab.toFixed(3)+'</b>. The saving rate never moves, k′ = αβk<sup>α</sup>, '+
+      'and the transversality term is β<sup>t</sup>·'+(ab/(1-ab)).toFixed(3)+' → 0. <b>This is the optimum</b>, '+
+      'and it is the only s₀ that produces it.';
+  } else if(s0>ab){
+    tg.textContent='Fails TVC';
+    tx.innerHTML='s₀ = <b>'+s0.toFixed(3)+'</b> &gt; αβ = '+ab.toFixed(3)+', so sₜ climbs to 1: the household saves '+
+      'everything and consumes nothing in the limit. 1 − sₜ shrinks by roughly αβ = '+ab.toFixed(3)+' per period while the '+
+      'discount factor only shrinks by β = '+be.toFixed(3)+', so β<sup>t</sup>λₜkₜ₊₁ <b>explodes</b>. Euler equation satisfied, '+
+      'transversality violated, <b>not optimal</b>.';
+  } else {
+    var when=r.feasT>=0?r.feasT:null;
+    tg.textContent='Infeasible';
+    tx.innerHTML='s₀ = <b>'+s0.toFixed(3)+'</b> &lt; αβ = '+ab.toFixed(3)+', so sₜ falls'+
+      (when!==null?' and turns negative at <b>t = '+when+'</b>':'')+
+      '. Negative saving of this kind means negative capital, negative production and negative consumption. '+
+      'The path leaves the feasible set in <b>finite time</b>. No transversality argument needed, it simply does not exist.';
+  }
+
+  /* drift note */
+  var dr=document.getElementById('a-drift');
+  var s2=ab,steps=0;
+  for(var d=0;d<400;d++){ s2=1-ab*(1-s2)/s2; steps++; if(s2>0.999||s2<=0) break; }
+  dr.innerHTML='Set s₀ exactly to αβ and iterate. Rounding error in the 16th digit is amplified by φ′(αβ) = 1/αβ = '+
+    (1/ab).toFixed(2)+' every period, so this page’s own arithmetic falls off the knife edge after about <b>'+
+    steps+' periods</b>. The optimal path is an unstable manifold. <b>That is why nobody solves this model by shooting</b>, '+
+    'and a large part of why we spend the course on the recursive formulation instead.';
+}
+
+function tickInts(a,b,k){
+  var step=Math.max(1,Math.ceil((b-a)/k)),out=[];
+  for(var v=a;v<=b+1e-9;v+=step)out.push(v);
+  return out;
+}
+function logTicks(lo,hi){
+  var a=Math.floor(Math.log10(lo)),b=Math.ceil(Math.log10(hi)),out=[];
+  var step=Math.max(1,Math.ceil((b-a)/6));
+  for(var e=a;e<=b;e+=step)out.push(Math.pow(10,e));
+  return out;
+}
+function logfmt(v){
+  if(v<=0)return '';
+  var e=Math.round(Math.log10(v));
+  if(e===0)return '1';
+  if(e===1)return '10';
+  return '1e'+e;
+}
+
+['a-alpha','a-beta','a-s0','a-n'].forEach(function(id){A[id].addEventListener('input',drawA);});
+document.querySelectorAll('[data-preset]').forEach(function(b){
+  b.addEventListener('click',function(){
+    var ab=(+A['a-alpha'].value)*(+A['a-beta'].value),p=b.getAttribute('data-preset');
+    var v = p==='exact'?ab : p==='above'? Math.min(0.98,ab+0.06) : Math.max(0.02,ab-0.04);
+    A['a-s0'].value=(Math.round(v/0.002)*0.002).toFixed(3); drawA();
+  });
+});
+document.getElementById('a-step').addEventListener('click',function(){
+  A['a-n'].value=Math.min(40,+A['a-n'].value+1); drawA();
+});
+
+/* ============================================================
+   LAB B
+   ============================================================ */
+var B={};
+['b-alpha','b-beta','b-f0','b-n','g-n'].forEach(function(id){B[id]=document.getElementById(id);});
+var pFn=new Plot(document.getElementById('cv-fn')),
+    pFe=new Plot(document.getElementById('cv-ferr')),
+    pPol=new Plot(document.getElementById('cv-pol')),
+    pGrid=new Plot(document.getElementById('cv-grid')),
+    pGerr=new Plot(document.getElementById('cv-gerr'));
+var pins=[];
+
+function fSeq(al,be,F0,n){
+  var ab=al*be,F=F0,out=[F];
+  for(var i=0;i<n;i++){F=al+ab*F;out.push(F);}
+  return out;
+}
+
+function drawB(){
+  var al=+B['b-alpha'].value, be=+B['b-beta'].value, F0=+B['b-f0'].value, n=+B['b-n'].value;
+  var ab=al*be, Fs=al/(1-ab);
+  document.getElementById('b-alpha-v').textContent=al.toFixed(2);
+  document.getElementById('b-beta-v').textContent=be.toFixed(3);
+  document.getElementById('b-f0-v').textContent=F0.toFixed(2);
+  document.getElementById('b-n-v').textContent=n;
+  document.getElementById('b-rate').textContent=ab.toFixed(3);
+  document.getElementById('b-rate2').textContent=ab.toFixed(3);
+
+  var st=tok('--struct'),fl=tok('--fail'),hd=tok('--hold'),i3=tok('--ink-3'),i2=tok('--ink-2'),ac=tok('--accent');
+  var palette=[fl,st,ac,hd,i2];
+
+  var seq=fSeq(al,be,F0,n);
+  var series=pins.map(function(p,i){return {F0:p,col:palette[i%palette.length],s:fSeq(al,be,p,n)};});
+
+  /* ---- F_n ---- */
+  var all=seq.slice(); series.forEach(function(s){all=all.concat(s.s);});
+  var lo=Math.min.apply(null,all),hi=Math.max.apply(null,all);
+  var pad=Math.max(0.4,(hi-lo)*0.08); lo-=pad; hi+=pad;
+  var F=pFn.begin({xmin:0,xmax:n,ymin:lo,ymax:hi,ml:48,mb:30});
+  F.frame(tickInts(0,n,6),niceTicks(lo,hi,5),String,function(v){return v.toFixed(1);});
+  F.line([[0,Fs],[n,Fs]],hd,1.4,[5,4]);
+  F.label(n,Fs,'F* = '+Fs.toFixed(4),hd,'right',-5,-10);
+  series.forEach(function(s){F.line(s.s.map(function(v,i){return [i,v];}),s.col,1.5);});
+  var main=seq.map(function(v,i){return [i,v];});
+  F.line(main,fl,2.2); F.dots(main,fl,2.4);
+  F.axtitle('n','Fₙ');
+
+  /* ---- error ---- */
+  var errs=seq.map(function(v){return Math.abs(v-Fs);}).filter(function(v){return v>0;});
+  var e0=Math.abs(F0-Fs)||1;
+  var emin=Math.max(1e-16,Math.min.apply(null,errs.length?errs:[1e-12]));
+  var E=pFe.begin({xmin:0,xmax:n,ymin:emin/3,ymax:Math.max(e0,1)*3,ml:52,mb:30,ylog:true});
+  E.frame(tickInts(0,n,6),logTicks(emin/3,Math.max(e0,1)*3),String,logfmt);
+  var bnd=[],ob=[];
+  for(var i=0;i<=n;i++){bnd.push([i,e0*Math.pow(be,i)]); var e=Math.abs(seq[i]-Fs); if(e>0)ob.push([i,e]);}
+  E.line(bnd,i3,1.5,[5,4]);
+  E.line(ob,fl,2.1); E.dots(ob,fl,2.2);
+  E.axtitle('n',null);
+
+  /* ---- verdict ---- */
+  document.getElementById('b-vtxt').innerHTML=
+    'F<sub>'+n+'</sub> = <b>'+seq[n].toFixed(8)+'</b> from F₀ = '+F0.toFixed(2)+
+    ', against F* = α/(1−αβ) = <b>'+Fs.toFixed(8)+'</b>. The implied saving rate is σ = βF/(1+βF) = <b>'+
+    (be*seq[n]/(1+be*seq[n])).toFixed(6)+'</b>, converging on αβ = '+ab.toFixed(3)+
+    ', the same number the sequence problem had to select by transversality.'+
+    (pins.length? ' Pinned starts on the chart: '+pins.map(function(p){return p.toFixed(1);}).join(', ')+'.' : '');
+
+  /* ---- policy functions ---- */
+  var kss=Math.pow(ab,1/(1-al)), kmin=0.15*kss, kmax=2.0*kss;
+  var G=pPol.begin({xmin:kmin,xmax:kmax,ymin:0,ymax:Math.max(kmax*0.85,ab*Math.pow(kmax,al)*1.3),ml:60,mb:32});
+  G.frame(niceTicks(kmin,kmax,5),niceTicks(0,G.y1,5),function(v){return v.toFixed(2);},function(v){return v.toFixed(2);});
+  G.line([[kmin,kmin],[kmax,kmax]],i3,1.3,[4,4]);
+  var ns=[1,2,3,5,10], seq0=fSeq(al,be,0,12);
+  ns.forEach(function(nn,j){
+    var Fv=seq0[nn], sg=be*Fv/(1+be*Fv), pts=[];
+    for(var k=kmin;k<=kmax;k+=(kmax-kmin)/160) pts.push([k,sg*Math.pow(k,al)]);
+    G.line(pts,st,1.2+j*0.25);
+    if(j===0||j===ns.length-1) G.label(kmax,sg*Math.pow(kmax,al),'n='+nn,st,'right',-6,j===0?9:-9);
+  });
+  var tp=[]; for(var k2=kmin;k2<=kmax;k2+=(kmax-kmin)/160) tp.push([k2,ab*Math.pow(k2,al)]);
+  G.line(tp,hd,2.4);
+  G.dots([[kss,kss]],hd,4);
+  G.label(kss,kss,'k_ss = '+kss.toFixed(3),hd,'left',8,-9);
+  G.axtitle('k','k′');
+}
+
+function niceTicks(lo,hi,k){
+  var raw=(hi-lo)/k, mag=Math.pow(10,Math.floor(Math.log10(raw))), norm=raw/mag;
+  var step=(norm<1.5?1:norm<3?2:norm<7?5:10)*mag;
+  var out=[],v=Math.ceil(lo/step)*step;
+  for(;v<=hi+1e-12;v+=step)out.push(Math.abs(v)<1e-12?0:v);
+  return out;
+}
+
+/* ---- grid VFI ---- */
+var gridCache={};
+function gridVFI(al,be,N){
+  var key=al+'|'+be+'|'+N; if(gridCache[key])return gridCache[key];
+  var ab=al*be, kss=Math.pow(ab,1/(1-al)), kmin=0.25*kss, kmax=1.75*kss;
+  var k=new Float64Array(N), i, j;
+  for(i=0;i<N;i++)k[i]=kmin+(kmax-kmin)*i/(N-1);
+  var ka=new Float64Array(N); for(i=0;i<N;i++)ka[i]=Math.pow(k[i],al);
+  var U=new Float64Array(N*N);
+  for(i=0;i<N;i++){var off=i*N; for(j=0;j<N;j++){var c=ka[i]-k[j]; U[off+j]= c>1e-14?Math.log(c):-1e10;}}
+  var Fs=al/(1-ab), Ec=(Math.log(1-ab)+be*Fs*Math.log(ab))/(1-be);
+  var vtrue=new Float64Array(N); for(i=0;i<N;i++)vtrue[i]=Ec+Fs*Math.log(k[i]);
+  var v=new Float64Array(N), vn=new Float64Array(N), idx=new Int32Array(N);
+  var hist=[], terr=[], it=0;
+  for(;it<1200;it++){
+    var d=0;
+    for(i=0;i<N;i++){
+      var o=i*N,best=-Infinity,bj=0;
+      for(j=0;j<N;j++){var val=U[o+j]+be*v[j]; if(val>best){best=val;bj=j;}}
+      vn[i]=best; idx[i]=bj;
+      var dd=Math.abs(best-v[i]); if(dd>d)d=dd;
+    }
+    var te=0; for(i=0;i<N;i++){var e=Math.abs(vn[i]-vtrue[i]); if(e>te)te=e;}
+    hist.push(d); terr.push(te);
+    var tmp=v; v=vn; vn=tmp;
+    if(d<1e-9){it++;break;}
+  }
+  var pol=new Float64Array(N), perr=0;
+  for(i=0;i<N;i++){pol[i]=k[idx[i]]; var pe=Math.abs(pol[i]-ab*ka[i]); if(pe>perr)perr=pe;}
+  var res={k:k,pol:pol,hist:hist,terr:terr,it:it,perr:perr,
+    spacing:k[1]-k[0],verr:terr[terr.length-1],kmin:kmin,kmax:kmax,ab:ab,al:al};
+  gridCache[key]=res; return res;
+}
+
+function drawGrid(al,be){
+  var N=+B['g-n'].value;
+  document.getElementById('g-n-v').textContent=N;
+  var r=gridVFI(al,be,N);
+  var st=tok('--struct'),fl=tok('--fail'),hd=tok('--hold'),i3=tok('--ink-3');
+
+  document.getElementById('g-info').textContent=
+    r.it+' iterations · '+(N*N).toLocaleString()+' evaluations per sweep';
+
+  var P=pGrid.begin({xmin:r.kmin,xmax:r.kmax,ymin:0,ymax:r.ab*Math.pow(r.kmax,al)*1.25,ml:60,mb:32});
+  P.frame(niceTicks(r.kmin,r.kmax,5),niceTicks(0,P.y1,5),
+    function(v){return v.toFixed(2);},function(v){return v.toFixed(3);});
+  var tp=[],ptsd=[],i;
+  for(i=0;i<r.k.length;i++){tp.push([r.k[i],r.ab*Math.pow(r.k[i],al)]); ptsd.push([r.k[i],r.pol[i]]);}
+  P.line(ptsd,fl,1.3);
+  P.dots(ptsd,fl,N>110?1.5:2.6);
+  P.line(tp,hd,2.2);
+  P.axtitle('k','k′');
+
+  var lo=1e-11, hi=Math.max(r.hist[0],r.terr[0])*3;
+  var M=r.hist.length;
+  var E=pGerr.begin({xmin:0,xmax:Math.max(M,4),ymin:lo,ymax:hi,ml:52,mb:30,ylog:true});
+  E.frame(tickInts(0,Math.max(M,4),6),logTicks(lo,hi),String,logfmt);
+  var h=[],bd=[],te=[];
+  for(i=0;i<M;i++){
+    h.push([i+1,Math.max(r.hist[i],1e-14)]);
+    bd.push([i+1,Math.max(be/(1-be)*r.hist[i],1e-14)]);
+    te.push([i+1,Math.max(r.terr[i],1e-14)]);
+  }
+  E.line(bd,st,1.6,[5,4]);
+  E.line(h,i3,1.7);
+  E.line(te,fl,2.2);
+  E.label(M,r.terr[M-1],'discretisation floor',fl,'right',-6,-11);
+  E.axtitle('iteration',null);
+
+  var tb=document.querySelector('#g-table tbody');
+  tb.innerHTML='';
+  [Math.max(10,Math.round(N/4/5)*5),Math.max(15,Math.round(N/2/5)*5),N].filter(function(v,i,a){return a.indexOf(v)===i;})
+   .forEach(function(nn){
+    var q=gridVFI(al,be,nn),tr=document.createElement('tr');
+    tr.innerHTML='<td>'+nn+(nn===N?' &nbsp;←&nbsp;current':'')+'</td><td>'+q.it+'</td><td>'+
+      q.perr.toExponential(2)+'</td><td>'+q.spacing.toExponential(2)+'</td><td>'+q.verr.toExponential(2)+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+var gt;
+function scheduleGrid(){clearTimeout(gt);
+  gt=setTimeout(function(){drawGrid(+B['b-alpha'].value,+B['b-beta'].value);},220);}
+['b-f0','b-n'].forEach(function(id){B[id].addEventListener('input',drawB);});
+['b-alpha','b-beta'].forEach(function(id){
+  B[id].addEventListener('input',function(){drawB();scheduleGrid();});});
+B['g-n'].addEventListener('input',function(){
+  document.getElementById('g-n-v').textContent=B['g-n'].value;});
+B['g-n'].addEventListener('change',function(){drawGrid(+B['b-alpha'].value,+B['b-beta'].value);});
+document.getElementById('b-pin').addEventListener('click',function(){
+  var v=+B['b-f0'].value; if(pins.indexOf(v)<0&&pins.length<5)pins.push(v); drawB();});
+document.getElementById('b-clear').addEventListener('click',function(){pins=[];drawB();});
+
+/* ---------------- lifecycle ---------------- */
+function drawAll(){
+  if(!document.getElementById('lab-a').hidden) drawA();
+  if(!document.getElementById('lab-b').hidden){drawB();drawGrid(+B['b-alpha'].value,+B['b-beta'].value);}
+}
+var rt;
+function schedule(){clearTimeout(rt);rt=setTimeout(drawAll,90);}
+window.addEventListener('resize',schedule);
+if(window.matchMedia)window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',drawAll);
+new MutationObserver(drawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawAll);
+drawA(); drawB(); drawGrid(+B['b-alpha'].value,+B['b-beta'].value);
+})();
+</script>
+</body>
+</html>
