@@ -126,16 +126,26 @@ If something does not work, close and reopen the terminal first (installers chan
 
 ## Repository structure
 
-The repository fills up over the semester. The intended layout:
+All code comes in two versions with the same content, one in Julia and one in Python. Go to the folder of the language you work in, each has its own README with setup instructions and an overview of the files.
 
 ```
 E8069-Computational-Macro/
 ├── README.md            this file
 ├── Syllabus.pdf         course plan, assessment, literature
-├── problem-sets/        problem sets and code templates (gap texts)
-├── snippets/            small coding snippets and workbooks between sessions
-└── projects/            information on the final project
+├── Julia/               Julia track: environment (Project.toml) and one folder per week
+│   ├── README.md
+│   └── Week_1/          Week_1_primer.ipynb: vectors, functions, structs, plotting, VFI by hand on a grid
+├── Python/              Python track: environment (environment.yml) and one folder per week
+│   ├── README.md
+│   └── Week_1/          Week_1_primer.ipynb: vectors, functions, classes, plotting, VFI by hand on a grid
+└── projects/            information on the final project (later in the semester)
 ```
+
+The repository fills up over the semester. Problem set templates (gap texts) and coding snippets go into the weekly folders of both language tracks.
+
+## Week 1 primer
+
+Before session 2, work through the notebook `Week_1_primer.ipynb` in `Julia/Week_1` or `Python/Week_1`. Its five parts introduce, in this order, arrays and broadcasting, functions and the loop with a convergence criterion, containers for parameters and grids, plotting, and the Bellman operator on a grid. Every file uses the growth model from the dynamic programming review of session 1 (log utility, production `k^alpha`, full depreciation): the loops iterate the recursion `F_{n+1} = alpha + alpha beta F_n` and the saving rate map from the slides, the analytical solution `k' = alpha beta k^alpha` serves as the benchmark, and the last file redoes the "VFI by hand" slide on a grid for `n = 1, 2, 3`. Session 2 turns that into value function iteration, which is also what problem set 1 asks for. Each part ends with three short exercises, they are not graded.
 
 ## Problem sets and the final project
 
