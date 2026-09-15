@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Course material
+#   Figures produced by the notebooks and template scripts
+figures/
+Week_*/*.png
+Week_*/*.pdf
+#   Julia compiled cache and scratch files
+*.jl.cov
+*.jl.mem

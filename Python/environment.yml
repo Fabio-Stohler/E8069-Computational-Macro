@@ -1,0 +1,10 @@
+name: compmacro
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy=2.2
+  - matplotlib=3.10
+  - scipy=1.15
+  - ipykernel
+  - jupyter
