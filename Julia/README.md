@@ -55,7 +55,7 @@ The second call is fast.
 
 ## Week 1: primer
 
-Read before the next session. `Week_1/Week_1_primer.ipynb` introduces the
+Read before the next session. `Week_1/Week_1_revision.ipynb` introduces the
 language constructs that the live coding in class uses, and nothing else, with the
 growth model of session 1 as the running example (log utility, production
 `k^α`, full depreciation, `α = 0.3` and `β = 0.96` as on the slides). It starts with how to select the course
