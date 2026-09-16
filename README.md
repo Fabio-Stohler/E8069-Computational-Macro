@@ -135,9 +135,11 @@ E8069-Computational-Macro/
 ├── Julia/               Julia track: environment (Project.toml) and one folder per week
 │   ├── README.md
 │   ├── Week_1/          Week_1_revision.ipynb: the language constructs used in session 2, on the growth model
+│   └── Week_2/          vfi_on_grid.ipynb (in class, with gaps), vfi_on_grid_solution.ipynb
 ├── Python/              Python track: environment (environment.yml) and one folder per week
 │   ├── README.md
 │   ├── Week_1/          Week_1_revision.ipynb: the language constructs used in session 2, on the growth model
+│   └── Week_2/          vfi_on_grid.ipynb (in class, with gaps), vfi_on_grid_solution.ipynb
 └── projects/            information on the final project (later in the semester)
 ```
 
@@ -147,6 +149,9 @@ The repository fills up over the semester. Problem set templates (gap texts) and
 
 Before the next session, work through the notebook `Week_1_revision.ipynb` in `Julia/Week_1` or `Python/Week_1`. It is short and introduces only the language constructs that the live coding in class uses: arrays and elementwise arithmetic, containers for parameters and grids, functions, a `while` loop that runs until a condition is met, and plots. Every part uses the growth model from the dynamic programming review of session 1 as its example: the closed form value and policy functions are evaluated and plotted on a grid, and the recursion `F_{n+1} = alpha + alpha beta F_n` from the slides is run to its limit and shown to converge at the rate `alpha beta`. Three short exercises at the end, not graded.
 
+## Week 2
+
+In session 2 we fill in the notebook `Week_2/vfi_on_grid.ipynb` (Julia or Python track) together: value function iteration on a grid for the growth model of session 1, with gaps marked `___`, and a last section for experimenting with the grid. The solution notebook is posted after the session.
 
 ## Problem sets and the final project
 
