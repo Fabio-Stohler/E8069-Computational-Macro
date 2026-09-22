@@ -19,13 +19,61 @@ instantiate
 ```
 
 Press backspace to leave the package mode. The first `instantiate`
-downloads and compiles Plots and IJulia, which takes a few minutes.
+downloads and compiles Plots, IJulia and DataInterpolations, which takes a few minutes.
 
 Tell VS Code to use this environment as well: click on the environment
 name in the bottom status bar (it says `Julia env: ...`) and pick this
 folder, or run "Julia: Change Current Environment" from the command
 palette (`Ctrl+Shift+P`). From then on, the REPL that VS Code starts for
 you has the packages available.
+
+## Updating the environment after a pull
+
+When a week adds a package (week 3 adds `DataInterpolations`), the files
+`Project.toml` and `Manifest.toml` in this folder change when you pull, but
+the package is not on your laptop yet. `using` the package then fails with
+`ArgumentError: Package DataInterpolations not found`. Install it once:
+
+1. **Pull the course repository.** In GitHub Desktop: select the course
+   repository, click "Fetch origin" and then "Pull origin". Or, in a terminal
+   in the repository folder, run `git pull`.
+2. **Open a terminal in VS Code.** Open the repository folder in VS Code (File,
+   Open Folder), then open a terminal with Terminal, New Terminal (or
+   ``Ctrl+` ``). The terminal starts in the repository folder, the one that
+   contains `Julia/` and `Python/`.
+3. **Move to the Julia folder.** Type
+
+   ```
+   cd Julia
+   ```
+
+   and press Enter. This works in PowerShell (Windows) and in the terminal on
+   macOS and Linux. Check with `ls`: you should see `Project.toml` and
+   `Manifest.toml`.
+4. **Start Julia** in this folder by typing `julia` and pressing Enter. The
+   prompt changes to `julia>`.
+5. **Update the packages.** Press `]` to enter the package mode, the prompt
+   changes to `(@v1.10) pkg>` (or your Julia version). Then run
+
+   ```
+   activate .
+   instantiate
+   ```
+
+   `activate .` selects the course environment in this folder (the prompt now
+   reads `(Julia) pkg>`), `instantiate` installs every package listed in
+   `Manifest.toml` that is missing on your laptop. This downloads and compiles
+   the new packages and can take a few minutes.
+6. **Check.** Press backspace to leave the package mode, then type
+   `using DataInterpolations`. If no error appears, you are done. Leave Julia
+   with `exit()`.
+7. **Restart the notebook kernel** if a notebook was open in VS Code while you
+   did this (the restart button at the top of the notebook), so that it sees the
+   new package.
+
+If you started Julia somewhere else, you do not need to quit: in Julia, type
+`cd("path/to/the/repository/Julia")` (with your path, forward slashes also work
+on Windows), check with `pwd()`, and continue with step 5.
 
 ## How to run the notebooks
 
@@ -81,3 +129,25 @@ checks against the closed form). Gaps are marked `___`, each one is one line
 of the pseudo-code on the slides. Section 6 holds the grid experiments, with
 an empty cell to try them in. `Week_2/vfi_on_grid_solution.ipynb` is posted
 after the session.
+
+## Week 3: value function iteration off the grid
+
+**In class.** `Week_3/vfi_off_grid.ipynb` continues with the growth model of
+week 2, but the household may now choose capital between the grid points.
+Part 1 zooms in on last week's policy, part 2 builds linear interpolation,
+takes the natural cubic spline from the package `DataInterpolations` and checks
+what the spline promises at the nodes (it goes through the points, its first and
+second derivative are continuous), part 3 is golden section search, part 4 puts
+the two together in the Bellman step. Part 5, Howard's improvement algorithm,
+and the experiments of part 6 are for home. Gaps are marked `___`, the comment
+next to each one says what goes in, and every part ends with a small test or a
+number to compare. `Week_3/vfi_off_grid_solution.ipynb` is posted after the
+session.
+
+**New package.** Week 3 adds `DataInterpolations` to the environment. Update
+the environment before class, see "Updating the environment after a pull"
+above.
+
+**AI-assisted coding.** `Week_3/ai_prompts.md` has the three prompts of the
+exercise in class, the questions to discuss, the course policy in short, and
+links to free courses on working with AI assistants.
