@@ -70,3 +70,25 @@ checks against the closed form). Gaps are marked `___`, each one is one line
 of the pseudo-code on the slides. Section 6 holds the grid experiments, with
 an empty cell to try them in. `Week_2/vfi_on_grid_solution.ipynb` is posted
 after the session.
+
+## Week 3: value function iteration off the grid
+
+**In class.** `Week_3/vfi_off_grid.ipynb` continues with the growth model of
+week 2, but the household may now choose capital between the grid points.
+Part 1 zooms in on last week's policy, part 2 builds linear interpolation,
+takes the natural cubic spline from `scipy.interpolate.CubicSpline` and checks
+what the spline promises at the nodes (it goes through the points, its first and
+second derivative are continuous), part 3 is golden section search, part 4 puts
+the two together in the Bellman step. Part 5, Howard's improvement algorithm,
+and the experiments of part 6 are for home. Gaps are marked `___`, the comment
+next to each one says what goes in, and every part ends with a small test or a
+number to compare. `scipy` is part of the `compmacro` environment already.
+To check, open a terminal in VS Code (Terminal, New Terminal), run
+`conda activate compmacro`, then `python -c "import scipy"`. No output means
+it is there. If you see `ModuleNotFoundError`, run `conda install -n compmacro
+scipy` (or `pip install scipy` if you installed without conda). `Week_3/vfi_off_grid_solution.ipynb` is posted
+after the session.
+
+**AI-assisted coding.** `Week_3/ai_prompts.md` has the three prompts of the
+exercise in class, the questions to discuss, the course policy in short, and
+links to free courses on working with AI assistants.

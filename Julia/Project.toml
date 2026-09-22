@@ -1,8 +1,10 @@
 [deps]
+DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
+DataInterpolations = "6, 7, 8, 9, 10"
 IJulia = "1"
 Plots = "1"
 julia = "1.10"
