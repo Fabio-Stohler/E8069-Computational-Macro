@@ -136,12 +136,14 @@ E8069-Computational-Macro/
 │   ├── README.md
 │   ├── Week_1/          Week_1_revision.ipynb: the language constructs used in session 2, on the growth model
 │   ├── Week_2/          vfi_on_grid.ipynb (in class, with gaps), vfi_on_grid_solution.ipynb
-│   └── Week_3/          vfi_off_grid.ipynb (in class, with gaps), vfi_off_grid_solution.ipynb, ai_prompts.md
+│   ├── Week_3/          vfi_off_grid.ipynb (in class, with gaps), vfi_off_grid_solution.ipynb, ai_prompts.md
+│   └── PS_1/            ps1_solution.ipynb: example solution to the coding part of problem set 1
 ├── Python/              Python track: environment (environment.yml) and one folder per week
 │   ├── README.md
 │   ├── Week_1/          Week_1_revision.ipynb: the language constructs used in session 2, on the growth model
 │   ├── Week_2/          vfi_on_grid.ipynb (in class, with gaps), vfi_on_grid_solution.ipynb
-│   └── Week_3/          vfi_off_grid.ipynb (in class, with gaps), vfi_off_grid_solution.ipynb, ai_prompts.md
+│   ├── Week_3/          vfi_off_grid.ipynb (in class, with gaps), vfi_off_grid_solution.ipynb, ai_prompts.md
+│   └── PS_1/            ps1_solution.ipynb: example solution to the coding part of problem set 1
 └── projects/            information on the final project (later in the semester)
 ```
 
@@ -162,6 +164,8 @@ In session 3 we fill in the notebook `Week_3/vfi_off_grid.ipynb` (Julia or Pytho
 ## Problem sets and the final project
 
 Problem sets are solved in teams of two and submitted through GitHub. Deadlines are Sundays at 23:59: 27.09. (PS 1), 11.10. (PS 2), 25.10. (PS 3), and 22.11.2026 (PS 4). The midterm takes place in class on 28.10.2026. The final project (repository and write-up) is due on 13.12.2026 at 23:59, after the project presentations on 09.12. See the syllabus for details on grading and the AI policy.
+
+The example solution to the coding part of problem set 1 is in `PS_1/ps1_solution.ipynb` (Julia or Python track).
 
 ## License
 
