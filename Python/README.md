@@ -83,12 +83,28 @@ the two together in the Bellman step. Part 5, Howard's improvement algorithm,
 and the experiments of part 6 are for home. Gaps are marked `___`, the comment
 next to each one says what goes in, and every part ends with a small test or a
 number to compare. `scipy` is part of the `compmacro` environment already.
-To check, open a terminal in VS Code (Terminal, New Terminal), run
-`conda activate compmacro`, then `python -c "import scipy"`. No output means
-it is there. If you see `ModuleNotFoundError`, run `conda install -n compmacro
-scipy` (or `pip install scipy` if you installed without conda). `Week_3/vfi_off_grid_solution.ipynb` is posted
+If it is missing on your laptop, run `conda install -n compmacro scipy` in a terminal (or `pip install scipy` if you installed without conda). `Week_3/vfi_off_grid_solution.ipynb` is posted
 after the session.
 
 **AI-assisted coding.** `Week_3/ai_prompts.md` has the three prompts of the
 exercise in class, the questions to discuss, the course policy in short, and
 links to free courses on working with AI assistants.
+
+## Week 5: Markov chains with QuantEcon, time iteration, and the endogenous grid method
+
+**In class (Thursday, 08.10.2026).** `Week_5/markov_chains_and_egm.ipynb` has three parts.
+Part 1 puts income on a grid with `qe.tauchen` and `qe.rouwenhorst` from the
+`quantecon` package, prints and compares the transition matrices, computes the
+stationary distribution and the moments of each chain for several persistences,
+and simulates a path, by hand and with `MarkovChain.simulate_indices`. Parts 2
+and 3 solve the CARA household of the session 5 slides with time iteration
+(expected marginal utility as a matrix product, the Euler residual, vectorized
+bisection) and with the endogenous grid method, and measure both against the
+exact policy. Gaps are marked `___`,
+the comment next to each one says what goes in, and every part ends with a
+number to compare. `Week_5/markov_chains_and_egm_solution.ipynb` is posted
+after the session.
+
+**New package.** Week 5 adds `quantecon` to the environment. Either update the
+environment with `conda env update -f environment.yml` from this folder, or
+let the first cell of the notebook install it into the running kernel.

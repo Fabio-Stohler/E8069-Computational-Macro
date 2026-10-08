@@ -6,5 +6,6 @@ dependencies:
   - numpy=2.2
   - matplotlib=3.10
   - scipy=1.15
+  - quantecon>=0.7
   - ipykernel
   - jupyter

@@ -29,10 +29,14 @@ you has the packages available.
 
 ## Updating the environment after a pull
 
-When a week adds a package (week 3 adds `DataInterpolations`), the files
+When a week adds a package (week 3 adds `DataInterpolations`, week 5 adds `QuantEcon`), the files
 `Project.toml` and `Manifest.toml` in this folder change when you pull, but
-the package is not on your laptop yet. `using` the package then fails with
-`ArgumentError: Package DataInterpolations not found`. Install it once:
+the package is not on your laptop yet. You do not need to do anything: the
+first code cell of the notebooks from week 5 on activates the course environment and
+runs `Pkg.instantiate()`, which installs whatever is missing. The first run after
+such a pull downloads and compiles the new package and can take a few minutes.
+
+Only if that cell fails, install the packages by hand, as follows:
 
 1. **Pull the course repository.** In GitHub Desktop: select the course
    repository, click "Fetch origin" and then "Pull origin". Or, in a terminal
@@ -151,3 +155,21 @@ above.
 **AI-assisted coding.** `Week_3/ai_prompts.md` has the three prompts of the
 exercise in class, the questions to discuss, the course policy in short, and
 links to free courses on working with AI assistants.
+
+## Week 5: Markov chains with QuantEcon, time iteration, and the endogenous grid method
+
+**In class (Thursday, 08.10.2026).** `Week_5/markov_chains_and_egm.ipynb` has three parts.
+Part 1 puts income on a grid with `tauchen` and `rouwenhorst` from the
+`QuantEcon` package, prints and compares the transition matrices, computes the
+stationary distribution and the moments of each chain for several persistences,
+and simulates a path, by hand and with `simulate_indices`. Parts 2 and 3 solve
+the CARA household of the session 5 slides with time iteration (expected
+marginal utility as a matrix product, the Euler residual, vectorized bisection)
+and with the endogenous grid method, and measure both against the exact policy.
+Gaps are marked `___`, the comment next
+to each one says what goes in, and every part ends with a number to compare.
+`Week_5/markov_chains_and_egm_solution.ipynb` is posted after the session.
+
+**New package.** Week 5 adds `QuantEcon` to the environment. Pull before class
+and run the first cell of the notebook, which installs it (a few minutes the
+first time), or follow "Updating the environment after a pull" above.
