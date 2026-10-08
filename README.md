@@ -137,12 +137,14 @@ E8069-Computational-Macro/
 │   ├── Week_1/          Week_1_revision.ipynb: the language constructs used in session 2, on the growth model
 │   ├── Week_2/          vfi_on_grid.ipynb (in class, with gaps), vfi_on_grid_solution.ipynb
 │   ├── Week_3/          vfi_off_grid.ipynb (in class, with gaps), vfi_off_grid_solution.ipynb, ai_prompts.md
+│   ├── Week_5/          markov_chains_and_egm.ipynb (in class, with gaps), ps2_template.ipynb (problem set 2)
 │   └── PS_1/            ps1_solution.ipynb: example solution to the coding part of problem set 1
 ├── Python/              Python track: environment (environment.yml) and one folder per week
 │   ├── README.md
 │   ├── Week_1/          Week_1_revision.ipynb: the language constructs used in session 2, on the growth model
 │   ├── Week_2/          vfi_on_grid.ipynb (in class, with gaps), vfi_on_grid_solution.ipynb
 │   ├── Week_3/          vfi_off_grid.ipynb (in class, with gaps), vfi_off_grid_solution.ipynb, ai_prompts.md
+│   ├── Week_5/          markov_chains_and_egm.ipynb (in class, with gaps), ps2_template.ipynb (problem set 2)
 │   └── PS_1/            ps1_solution.ipynb: example solution to the coding part of problem set 1
 └── projects/            information on the final project (later in the semester)
 ```
@@ -159,11 +161,15 @@ In session 2 we fill in the notebook `Week_2/vfi_on_grid.ipynb` (Julia or Python
 
 ## Week 3
 
-In session 3 we fill in the notebook `Week_3/vfi_off_grid.ipynb` (Julia or Python track): value function iteration off the grid for the same growth model. The household may now choose capital between the grid points, which needs two tools: interpolation (linear interpolation written by hand, the natural cubic spline from a package, `DataInterpolations` in Julia and `scipy` in Python) and the maximization of a continuous function (golden section search, written by hand). Part 5, Howard's improvement algorithm, and part 6, experiments, are for home. **Julia users: week 3 adds the package `DataInterpolations`. Update your environment before class, step by step in `Julia/README.md`, section "Updating the environment after a pull": pull, open a terminal in VS Code, `cd Julia`, start `julia`, press `]`, run `activate .` and `instantiate`.** Python users need nothing new, `scipy` is part of the `compmacro` environment. `Week_3/ai_prompts.md` has the three prompts of the exercise on AI-assisted coding, together with links to free courses. The solution notebook is posted after the session.
+In session 3 we fill in the notebook `Week_3/vfi_off_grid.ipynb` (Julia or Python track): value function iteration off the grid for the same growth model. The household may now choose capital between the grid points, which needs two tools: interpolation (linear interpolation written by hand, the natural cubic spline from a package, `DataInterpolations` in Julia and `scipy` in Python) and the maximization of a continuous function (golden section search, written by hand). Part 5, Howard's improvement algorithm, and part 6, experiments, are for home. **Julia users: week 3 adds the package `DataInterpolations`. Pull before class and run the first cell of the notebook, which installs it (this takes a few minutes the first time).** Python users need nothing new, `scipy` is part of the `compmacro` environment, and the first cell of the notebook installs it if it is missing. `Week_3/ai_prompts.md` has the three prompts of the exercise on AI-assisted coding, together with links to free courses. The solution notebook is posted after the session.
+
+## Week 5
+
+Two sessions this week. Wednesday is the lecture (income on a grid, the CARA benchmark, time iteration, root finding, Howard, the endogenous grid method). On **Thursday, 08.10.2026, 10:15 to 11:45** we fill in `Week_5/markov_chains_and_egm.ipynb` (Julia or Python track): Tauchen and Rouwenhorst with the `QuantEcon` package, printing and comparing the transition matrices, the stationary distribution, a simulation, and then time iteration and the endogenous grid method on the CARA household of the slides, both measured against the exact policy. Part 4 (persistent income) is for home. **Both tracks add a package this week, `quantecon` (Python) and `QuantEcon` (Julia). Pull before class and run the first cell of the notebook, which installs it.** The solution notebook is posted after the session. `Week_5/ps2_template.ipynb` is the template of problem set 2.
 
 ## Problem sets and the final project
 
-Problem sets are solved in teams of two and submitted through GitHub. Deadlines are Sundays at 23:59: 27.09. (PS 1), 11.10. (PS 2), 25.10. (PS 3), and 22.11.2026 (PS 4). The midterm takes place in class on 28.10.2026. The final project (repository and write-up) is due on 13.12.2026 at 23:59, after the project presentations on 09.12. See the syllabus for details on grading and the AI policy.
+Problem sets are solved in teams of two and submitted through GitHub. There are three: PS 1 was due on Sunday, 27.09.2026, PS 2 is due on Wednesday, 21.10.2026, at 23:59, and PS 3 on Sunday, 22.11.2026, at 23:59. The midterm takes place in class on 28.10.2026, a mock exam is distributed on 21.10.2026. The final project (repository and write-up) is due on 13.12.2026 at 23:59, after the project presentations on 09.12. See the syllabus for details on grading and the AI policy.
 
 The example solution to the coding part of problem set 1 is in `PS_1/ps1_solution.ipynb` (Julia or Python track).
 
